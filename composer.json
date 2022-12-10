@@ -3,7 +3,7 @@
     "description": "A lightweight extension allowing to translate in the ApiPlatform flow the values of the properties of an entity by a simple annotation.",
     "type": "symfony-bundle",
     "require": {
-        "php": "^7.2 || ^8.0",
+        "php": "^7.4 || ^8.0",
         "symfony/translation": ">=5.4",
         "api-platform/core": ">=2.5",
         "doctrine/annotations": ">=1.0"
