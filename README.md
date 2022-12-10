@@ -44,5 +44,15 @@ class AnyEntity
      * @StreamTranslate(domain="anyDomain")
      */
     private string $anyStringPropertyNoKeyBasedExample;
+    
+
+    /**
+     * * * NEW ON 2.0.0 * * *
+     * Iterate on each embed relation, don't forget do annotate related class properties.
+     * Tips: You can use different domain on related class property's annotation.
+     *
+     * @StreamTranslate(domain="anyDomain", childs=true)
+     */
+    private ArrayCollection $anyStringPropertyNoKeyBasedExample;
 }
 ```
