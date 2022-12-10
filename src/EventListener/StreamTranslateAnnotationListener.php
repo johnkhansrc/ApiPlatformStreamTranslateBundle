@@ -6,6 +6,7 @@ namespace Johnkhansrc\ApiPlatformStreamTranslateBundle\EventListener;
 use ApiPlatform\Core\Bridge\Doctrine\Orm\Paginator;
 use ApiPlatform\Core\EventListener\EventPriorities;
 use Doctrine\Common\Annotations\Reader;
+use Doctrine\Common\Collections\Collection;
 use ReflectionClass;
 use Johnkhansrc\ApiPlatformStreamTranslateBundle\Annotation\StreamTranslate;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -39,7 +40,7 @@ class StreamTranslateAnnotationListener implements EventSubscriberInterface
     public function translateOnResponse(ViewEvent $event): void
     {
         $translatable = $event->getControllerResult();
-        if ($translatable instanceof Paginator || is_array($translatable)) {
+        if ($translatable instanceof Paginator || is_array($translatable) || $translatable instanceof Collection) {
             foreach ((is_array($translatable)) ? $translatable : $translatable->getIterator() as $item) {
                 $this->translateProperties($item);
             }
