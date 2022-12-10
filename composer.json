@@ -7,7 +7,7 @@
         "symfony/translation": ">=5.4",
         "api-platform/core": ">=2.5",
         "doctrine/annotations": ">=1.0",
-        "doctrine/collections": ">=1.8.0"
+        "doctrine/collections": ">=1.7.0"
     },
     "license": "MIT",
     "autoload": {
