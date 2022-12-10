@@ -85,8 +85,12 @@ class StreamTranslateAnnotationListener implements EventSubscriberInterface
      */
     public function translateChildsProperties($ressources): void
     {
-        foreach ($ressources as $ressource) {
-            $this->translateRessource($ressource);
+        if (is_iterable($ressources)) {
+            foreach ($ressources as $ressource) {
+                $this->translateRessource($ressource);
+            }
+        } else {
+            $this->translateRessource($ressources);
         }
     }
 
