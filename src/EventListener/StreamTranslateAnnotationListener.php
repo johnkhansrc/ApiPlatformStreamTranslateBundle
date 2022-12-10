@@ -36,49 +36,75 @@ class StreamTranslateAnnotationListener implements EventSubscriberInterface
     }
 
     /**
-     * @throws \ReflectionException
+     * @throws \ReflectionException|\Exception
      */
     public function translateOnResponse(ViewEvent $event): void
     {
         $translatable = $event->getControllerResult();
         if ($translatable instanceof Paginator || is_array($translatable) || $translatable instanceof Collection) {
             foreach ((is_array($translatable)) ? $translatable : $translatable->getIterator() as $item) {
-                $this->translateProperties($item);
+                $this->translateRessource($item);
             }
             return;
         }
-        $this->translateProperties($translatable);
+        $this->translateRessource($translatable);
     }
 
-    private function translateProperties($item): void
+    /**
+     * @param mixed $ressource
+     * @throws \ReflectionException
+     * @throws \Exception
+     */
+    private function translateRessource($ressource): void
     {
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
-        $reflector = new ReflectionClass($item);
+        $reflector = new ReflectionClass($ressource);
         foreach ($reflector->getProperties() as $property) {
-            if (!$propertyAccessor->isReadable($item, $property->name)) {
+            if (!$propertyAccessor->isReadable($ressource, $property->name)) {
                 continue;
             }
-            if ($propertyAccessor->getValue($item, $property->name) instanceof Collection) {
-                /** @var Collection $childCollection */
-                $childCollection = $propertyAccessor->getValue($item, $property->name);
-                foreach ($childCollection->getIterator() as $child) {
-                    $this->translateProperties($child);
-                }
 
+            $annotation = $this->annotationReader->getPropertyAnnotation($property, StreamTranslate::class);
+            if (!$annotation) {
                 continue;
             }
-            $annotation = $this->annotationReader->getPropertyAnnotation($property, StreamTranslate::class);
-            if ($annotation instanceof StreamTranslate) {
-                $propertyAccessor->setValue(
-                    $item,
-                    $property->name,
-                    $this->translator->trans(
-                        $annotation->key ?? $propertyAccessor->getValue($item, $property->name),
-                        [],
-                        $annotation->domain
-                    )
-                );
+
+            if ($annotation->childs) {
+                $this->translateChildsProperties($propertyAccessor->getValue($ressource, $property->name));
+            } else {
+
+                $this->translateProperty($ressource, $property->name, $annotation);
             }
         }
+    }
+
+    /**
+     * @param array|Collection $ressources
+     * @return void
+     * @throws \ReflectionException
+     */
+    public function translateChildsProperties($ressources): void
+    {
+        foreach ($ressources as $ressource) {
+            $this->translateRessource($ressource);
+        }
+    }
+
+    /**
+     * @param mixed $ressource
+     * @throws \Exception
+     */
+    private function translateProperty($ressource, string $propertyName, StreamTranslate $annotation): void
+    {
+        $propertyAccessor = PropertyAccess::createPropertyAccessor();
+        $propertyAccessor->setValue(
+            $ressource,
+            $propertyName,
+            $this->translator->trans(
+                $annotation->key ?? $propertyAccessor->getValue($ressource, $propertyName),
+                [],
+                $annotation->domain
+            )
+        );
     }
 }
