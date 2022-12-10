@@ -29,8 +29,9 @@ class StreamTranslateAnnotationListener implements EventSubscriberInterface
     public static function getSubscribedEvents(): array
     {
         return [
-            // must be registered before (i.e. with a higher priority than) the default Locale listener
-            KernelEvents::VIEW => [['translateOnResponse', EventPriorities::PRE_SERIALIZE]],
+            KernelEvents::VIEW => [
+                ['translateOnResponse', EventPriorities::PRE_SERIALIZE]
+            ],
         ];
     }
 
@@ -54,6 +55,18 @@ class StreamTranslateAnnotationListener implements EventSubscriberInterface
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
         $reflector = new ReflectionClass($item);
         foreach ($reflector->getProperties() as $property) {
+            if (!$propertyAccessor->isReadable($item, $property->name)) {
+                continue;
+            }
+            if ($propertyAccessor->getValue($item, $property->name) instanceof Collection) {
+                /** @var Collection $childCollection */
+                $childCollection = $propertyAccessor->getValue($item, $property->name);
+                foreach ($childCollection->getIterator() as $child) {
+                    $this->translateProperties($child);
+                }
+
+                return;
+            }
             $annotation = $this->annotationReader->getPropertyAnnotation($property, StreamTranslate::class);
             if ($annotation instanceof StreamTranslate) {
                 $propertyAccessor->setValue(
