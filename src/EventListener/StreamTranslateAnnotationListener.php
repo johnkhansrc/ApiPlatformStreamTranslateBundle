@@ -39,10 +39,11 @@ class StreamTranslateAnnotationListener implements EventSubscriberInterface
     public function translateOnResponse(ViewEvent $event): void
     {
         $translatable = $event->getControllerResult();
-        if ($translatable instanceof Paginator) {
-            foreach ($translatable->getIterator() as $item) {
+        if ($translatable instanceof Paginator || is_array($translatable)) {
+            foreach ((is_array($translatable)) ? $translatable : $translatable->getIterator() as $item) {
                 $this->translateProperties($item);
             }
+            return;
         }
         $this->translateProperties($translatable);
     }
