@@ -3,6 +3,7 @@
 namespace Johnkhansrc\ApiPlatformStreamTranslateBundle\EventListener;
 
 
+use ApiPlatform\Core\Bridge\Doctrine\Orm\Paginator;
 use ApiPlatform\Core\EventListener\EventPriorities;
 use Doctrine\Common\Annotations\Reader;
 use ReflectionClass;
@@ -38,16 +39,26 @@ class StreamTranslateAnnotationListener implements EventSubscriberInterface
     public function translateOnResponse(ViewEvent $event): void
     {
         $translatable = $event->getControllerResult();
+        if ($translatable instanceof Paginator) {
+            foreach ($translatable->getIterator() as $item) {
+                $this->translateProperties($item);
+            }
+        }
+        $this->translateProperties($translatable);
+    }
+
+    private function translateProperties($item): void
+    {
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
-        $reflector = new ReflectionClass($translatable);
+        $reflector = new ReflectionClass($item);
         foreach ($reflector->getProperties() as $property) {
             $annotation = $this->annotationReader->getPropertyAnnotation($property, StreamTranslate::class);
             if ($annotation instanceof StreamTranslate) {
                 $propertyAccessor->setValue(
-                    $translatable,
+                    $item,
                     $property->name,
                     $this->translator->trans(
-                        $annotation->key ?? $propertyAccessor->getValue($translatable, $property->name),
+                        $annotation->key ?? $propertyAccessor->getValue($item, $property->name),
                         [],
                         $annotation->domain
                     )
