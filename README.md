@@ -10,6 +10,10 @@ A lightweight extension allowing to translate in the ApiPlatform flow the proper
 ```
 composer require johnkhansrc/api-platform-stream-translate-bundle
 ```
+Update your services.yaml
+```yaml
+Johnkhansrc\ApiPlatformStreamTranslateBundle\EventListener\StreamTranslateAnnotationListener: ~
+```
 
 ## Usage
 ```php
