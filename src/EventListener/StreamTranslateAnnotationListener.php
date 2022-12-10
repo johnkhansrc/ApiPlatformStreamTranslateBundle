@@ -65,7 +65,7 @@ class StreamTranslateAnnotationListener implements EventSubscriberInterface
                     $this->translateProperties($child);
                 }
 
-                return;
+                continue;
             }
             $annotation = $this->annotationReader->getPropertyAnnotation($property, StreamTranslate::class);
             if ($annotation instanceof StreamTranslate) {
