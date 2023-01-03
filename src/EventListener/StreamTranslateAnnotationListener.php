@@ -57,6 +57,9 @@ class StreamTranslateAnnotationListener implements EventSubscriberInterface
      */
     private function translateRessource($ressource): void
     {
+        if (!$ressource) {
+            return;
+        }
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
         $reflector = new ReflectionClass($ressource);
         foreach ($reflector->getProperties() as $property) {
@@ -85,6 +88,9 @@ class StreamTranslateAnnotationListener implements EventSubscriberInterface
      */
     public function translateChildsProperties($ressources): void
     {
+        if (!$ressources) {
+            return;
+        }
         if (is_iterable($ressources)) {
             foreach ($ressources as $ressource) {
                 $this->translateRessource($ressource);
@@ -100,6 +106,9 @@ class StreamTranslateAnnotationListener implements EventSubscriberInterface
      */
     private function translateProperty($ressource, string $propertyName, StreamTranslate $annotation): void
     {
+        if (!$ressource) {
+            return;
+        }
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
         $propertyAccessor->setValue(
             $ressource,
