@@ -3,8 +3,8 @@
 namespace Johnkhansrc\ApiPlatformStreamTranslateBundle\EventListener;
 
 
-use ApiPlatform\Core\Bridge\Doctrine\Orm\Paginator;
-use ApiPlatform\Core\EventListener\EventPriorities;
+use ApiPlatform\Doctrine\Orm\Paginator;
+use ApiPlatform\Symfony\EventListener\EventPriorities;
 use Doctrine\Common\Annotations\Reader;
 use Doctrine\Common\Collections\Collection;
 use ReflectionClass;
