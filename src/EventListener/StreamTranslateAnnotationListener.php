@@ -7,8 +7,10 @@ use ApiPlatform\Doctrine\Orm\Paginator;
 use ApiPlatform\Symfony\EventListener\EventPriorities;
 use Doctrine\Common\Annotations\Reader;
 use Doctrine\Common\Collections\Collection;
+use Exception;
 use ReflectionClass;
 use Johnkhansrc\ApiPlatformStreamTranslateBundle\Annotation\StreamTranslate;
+use ReflectionException;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\Event\ViewEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
@@ -36,7 +38,7 @@ class StreamTranslateAnnotationListener implements EventSubscriberInterface
     }
 
     /**
-     * @throws \ReflectionException|\Exception
+     * @throws ReflectionException|Exception
      */
     public function translateOnResponse(ViewEvent $event): void
     {
@@ -51,11 +53,10 @@ class StreamTranslateAnnotationListener implements EventSubscriberInterface
     }
 
     /**
-     * @param mixed $ressource
-     * @throws \ReflectionException
-     * @throws \Exception
+     * @throws ReflectionException
+     * @throws Exception
      */
-    private function translateRessource($ressource): void
+    private function translateRessource(mixed $ressource): void
     {
         if (!$ressource) {
             return;
@@ -82,11 +83,9 @@ class StreamTranslateAnnotationListener implements EventSubscriberInterface
     }
 
     /**
-     * @param array|Collection $ressources
-     * @return void
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
-    public function translateChildsProperties($ressources): void
+    public function translateChildsProperties(mixed $ressources): void
     {
         if (!$ressources) {
             return;
@@ -101,10 +100,9 @@ class StreamTranslateAnnotationListener implements EventSubscriberInterface
     }
 
     /**
-     * @param mixed $ressource
-     * @throws \Exception
+     * @throws Exception
      */
-    private function translateProperty($ressource, string $propertyName, StreamTranslate $annotation): void
+    private function translateProperty(mixed $ressource, string $propertyName, StreamTranslate $annotation): void
     {
         if (!$ressource) {
             return;
