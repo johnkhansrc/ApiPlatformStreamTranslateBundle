@@ -5,12 +5,12 @@ namespace Johnkhansrc\ApiPlatformStreamTranslateBundle\EventListener;
 
 use ApiPlatform\Doctrine\Orm\Paginator;
 use ApiPlatform\Symfony\EventListener\EventPriorities;
-use Doctrine\Common\Annotations\Reader;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Persistence\Proxy;
 use Exception;
+use ReflectionAttribute;
 use ReflectionClass;
-use Johnkhansrc\ApiPlatformStreamTranslateBundle\Annotation\StreamTranslate;
+use Johnkhansrc\ApiPlatformStreamTranslateBundle\Attribute\StreamTranslate;
 use ReflectionException;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\Event\ViewEvent;
@@ -18,16 +18,10 @@ use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-class StreamTranslateAnnotationListener implements EventSubscriberInterface
+class StreamTranslateAttributeListener implements EventSubscriberInterface
 {
-    private Reader $annotationReader;
-    private TranslatorInterface $translator;
-
-    public function __construct(Reader $annotationReader, TranslatorInterface $translator)
-    {
-        $this->annotationReader = $annotationReader;
-        $this->translator = $translator;
-    }
+    public function __construct(private TranslatorInterface $translator)
+    {}
 
     public static function getSubscribedEvents(): array
     {
@@ -76,16 +70,21 @@ class StreamTranslateAnnotationListener implements EventSubscriberInterface
                 continue;
             }
 
-            $annotation = $this->annotationReader->getPropertyAnnotation($property, StreamTranslate::class);
-            if (!$annotation) {
+            $attribute = $property->getAttributes(StreamTranslate::class, ReflectionAttribute::IS_INSTANCEOF);
+            if (!$attribute) {
                 continue;
             }
 
-            if ($annotation->childs) {
+            $reflexionAttribute = $attribute[0];
+
+            /** @var StreamTranslate $attribute */
+            $attribute = $reflexionAttribute->newInstance();
+
+            if ($attribute->childs) {
                 $this->translateChildsProperties($propertyAccessor->getValue($ressource, $property->name));
             } else {
 
-                $this->translateProperty($ressource, $property->name, $annotation);
+                $this->translateProperty($ressource, $property->name, $attribute);
             }
         }
     }
@@ -110,7 +109,7 @@ class StreamTranslateAnnotationListener implements EventSubscriberInterface
     /**
      * @throws Exception
      */
-    private function translateProperty(mixed $ressource, string $propertyName, StreamTranslate $annotation): void
+    private function translateProperty(mixed $ressource, string $propertyName, StreamTranslate $attribute): void
     {
         if (!$ressource) {
             return;
@@ -120,9 +119,9 @@ class StreamTranslateAnnotationListener implements EventSubscriberInterface
             $ressource,
             $propertyName,
             $this->translator->trans(
-                $annotation->key ?? $propertyAccessor->getValue($ressource, $propertyName),
+                $attribute->key ?? $propertyAccessor->getValue($ressource, $propertyName),
                 [],
-                $annotation->domain
+                $attribute->domain
             )
         );
     }
