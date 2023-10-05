@@ -7,6 +7,7 @@ use ApiPlatform\Doctrine\Orm\Paginator;
 use ApiPlatform\Symfony\EventListener\EventPriorities;
 use Doctrine\Common\Annotations\Reader;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\Persistence\Proxy;
 use Exception;
 use ReflectionClass;
 use Johnkhansrc\ApiPlatformStreamTranslateBundle\Annotation\StreamTranslate;
@@ -63,7 +64,11 @@ class StreamTranslateAnnotationListener implements EventSubscriberInterface
         }
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
         $reflector = new ReflectionClass($ressource);
+        if ($ressource instanceof Proxy) {
+            $reflector = $reflector->getParentClass();
+        }
         foreach ($reflector->getProperties() as $property) {
+            $property->setAccessible(true);
             if (!$propertyAccessor->isReadable($ressource, $property->name)) {
                 continue;
             }
